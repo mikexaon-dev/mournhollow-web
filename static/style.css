@@ -116,5 +116,41 @@ button{ font-family:inherit; cursor:pointer; }
   .status{ order:-1; flex-direction:row; flex-wrap:wrap; }
   .status .card{ flex:1; min-width:140px; }
   .chat{ min-height:48vh; }
-  .heroes{ grid-template-columns:1fr; }
 }
+
+/* ===== Hero grid (รองรับ 5 ใบ) ===== */
+.heroes{ grid-template-columns:repeat(auto-fit,minmax(116px,1fr)); }
+
+/* ===== Dice tray ===== */
+.dice{ padding:8px 6px 0; }
+.diceToggle{ background:#241a17; color:var(--ember); border:1px solid #5a3f2a; border-radius:8px; padding:5px 12px; font-size:13px; }
+.diceToggle:hover{ background:#2e201a; }
+.dicePanel{ margin-top:8px; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:10px; }
+.diceRow{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.dieBtns .die{ background:#2a1d18; color:#f0d9b5; border:1px solid #5a3f2a; border-radius:8px; padding:7px 11px; font-weight:700; min-width:46px; }
+.dieBtns .die:hover{ border-color:var(--ember); background:#34241c; transform:translateY(-1px); }
+.opts{ margin-top:8px; color:var(--muted); font-size:13px; }
+.opts label{ display:flex; align-items:center; gap:4px; }
+.opts input[type=number]{ width:50px; background:#1a1310; color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:3px 5px; }
+.radio{ cursor:pointer; }
+.diceResult{ margin-top:9px; padding:8px 10px; background:#15100d; border:1px solid var(--line); border-radius:8px; color:var(--gold); font-weight:600; font-size:15px; min-height:20px; }
+.diceResult .crit{ color:#7ee07e; } .diceResult .fail{ color:#ff6f6f; }
+.diceSend{ margin-top:8px; background:linear-gradient(180deg,var(--red),var(--red2)); color:#fff; border:none; border-radius:8px; padding:8px 14px; font-weight:700; }
+
+/* ===== Saves drawer ===== */
+.drawer{ position:fixed; inset:0; z-index:40; display:flex; justify-content:flex-end; background:rgba(8,5,4,.7); }
+.drawer.hidden{ display:none; }
+.drawer-card{ width:min(370px,92%); height:100%; background:linear-gradient(180deg,var(--panel2),var(--panel)); border-left:1px solid var(--line); padding:16px; overflow-y:auto; box-shadow:-20px 0 50px #000; }
+.drawer-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; color:#f1e3c8; font-family:"Cinzel",serif; font-size:17px; }
+.saves-list{ display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+.save-item{ background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:10px 12px; }
+.save-item.cur{ border-color:var(--ember); box-shadow:0 0 0 1px var(--ember) inset; }
+.save-item .si-name{ font-weight:600; color:#f1e3c8; }
+.save-item .si-meta{ font-size:11.5px; color:var(--muted); margin:2px 0 7px; }
+.save-item .si-btns{ display:flex; gap:6px; }
+.si-btns button{ flex:1; border-radius:7px; padding:5px; font-size:12.5px; border:1px solid var(--line); background:#241a17; color:var(--ink); cursor:pointer; }
+.si-btns .load{ border-color:#3a5a40; color:#9fe0a8; }
+.si-btns .del{ border-color:#5a2a2a; color:#e89a9a; }
+.start.small{ padding:10px; font-size:14px; }
+.empty{ color:var(--muted); font-size:13px; text-align:center; padding:16px; }
+

@@ -22,15 +22,23 @@
     <div class="heroes" id="heroPick">
       <button class="hero" data-hero="เคย์น" data-klass="Fighter">
         <span class="hn">เคย์น</span><span class="hk">Human Fighter</span>
-        <span class="hd">ทหารผ่านศึกหนีอดีต · อึด ถึก แนวหน้า</span>
+        <span class="hd">ทหารผ่านศึก · อึด ถึก แนวหน้า</span>
       </button>
       <button class="hero" data-hero="เวสเปอร์" data-klass="Rogue">
         <span class="hn">เวสเปอร์</span><span class="hk">Tiefling Rogue</span>
-        <span class="hd">นักลอบคมเขี้ยว · เปราะบางแต่อันตราย</span>
+        <span class="hd">นักลอบคมเขี้ยว · เปราะแต่อันตราย</span>
       </button>
       <button class="hero" data-hero="เอลส์เบธ" data-klass="Cleric">
         <span class="hn">เอลส์เบธ</span><span class="hk">Human Cleric</span>
         <span class="hd">นักบวชสายมืด · รักษา + อึด</span>
+      </button>
+      <button class="hero" data-hero="เรเวน" data-klass="Ranger">
+        <span class="hn">เรเวน</span><span class="hk">Human Ranger</span>
+        <span class="hd">นักล่าค่าหัว · ระยะไกล สะกดรอย</span>
+      </button>
+      <button class="hero" data-hero="มอร์ดิไค" data-klass="Wizard">
+        <span class="hn">มอร์ดิไค</span><span class="hk">Human Wizard</span>
+        <span class="hd">นักเวทนอกรีต · แรงแต่เปราะมาก</span>
       </button>
     </div>
 
@@ -45,12 +53,22 @@
   </div>
 </div>
 
-<!-- ===== Main ===== -->
+<!-- ===== Saves drawer ===== -->
+<div id="saves" class="drawer hidden">
+  <div class="drawer-card">
+    <div class="drawer-head"><b>💾 เกมที่บันทึก</b><button id="savesClose" class="ghost">✕</button></div>
+    <div id="savesList" class="saves-list"></div>
+    <button id="newGameBtn" class="start small">+ เริ่มเกมใหม่</button>
+  </div>
+</div>
+
+<!-- ===== Topbar ===== -->
 <header class="topbar">
   <div class="brand">เงาเหนือมอร์นโฮลโลว์ <span class="ver">· เล่นกับ AI</span></div>
   <div class="topright">
     <span id="conn" class="conn">●</span>
-    <button id="resetBtn" class="ghost" title="เริ่มใหม่">↻ เริ่มใหม่</button>
+    <button id="savesBtn" class="ghost" title="เกมที่บันทึก">💾 เกม</button>
+    <button id="resetBtn" class="ghost" title="เริ่มเกมใหม่">＋ ใหม่</button>
   </div>
 </header>
 
@@ -58,10 +76,35 @@
   <section class="chatwrap">
     <div id="chat" class="chat"></div>
     <div id="typing" class="typing" hidden><span></span><span></span><span></span> GM กำลังคิด…</div>
+
+    <!-- Dice tray -->
+    <div class="dice">
+      <button class="diceToggle" id="diceToggle">🎲 ทอยเต๋า</button>
+      <div class="dicePanel" id="dicePanel" hidden>
+        <div class="diceRow dieBtns">
+          <button class="die" data-d="20">d20</button>
+          <button class="die" data-d="12">d12</button>
+          <button class="die" data-d="10">d10</button>
+          <button class="die" data-d="8">d8</button>
+          <button class="die" data-d="6">d6</button>
+          <button class="die" data-d="4">d4</button>
+          <button class="die" data-d="100">d100</button>
+        </div>
+        <div class="diceRow opts">
+          <label>โม +<input id="diceMod" type="number" value="0" step="1"></label>
+          <label class="radio"><input type="radio" name="adv" value="0" checked>ปกติ</label>
+          <label class="radio"><input type="radio" name="adv" value="1">ได้เปรียบ</label>
+          <label class="radio"><input type="radio" name="adv" value="-1">เสียเปรียบ</label>
+        </div>
+        <div class="diceResult" id="diceResult">เลือกลูกเต๋าเพื่อทอย (สุ่มจริงด้วย crypto)</div>
+        <button class="diceSend" id="diceSend" hidden>▶ ส่งผลนี้ให้ GM</button>
+      </div>
+    </div>
+
     <div class="inputbar">
       <textarea id="input" rows="1" placeholder="พิมพ์สิ่งที่ตัวละครจะทำ… (Enter ส่ง · Shift+Enter ขึ้นบรรทัด)"></textarea>
       <div class="btns">
-        <button id="contBtn" class="cont" title="ให้เรื่องเดินต่อ (สำหรับโหมด C)" hidden>▶ ต่อ</button>
+        <button id="contBtn" class="cont" title="ให้เรื่องเดินต่อ (โหมด C)" hidden>▶ ต่อ</button>
         <button id="sendBtn" class="send">ส่ง</button>
       </div>
     </div>
@@ -72,24 +115,20 @@
       <div class="hero-name" id="sName">—</div>
       <div class="hero-sub"><span id="sKlass">—</span> · Lv <span id="sLevel">1</span> · <span class="mode-badge" id="sMode">A</span></div>
     </div>
-
     <div class="card">
       <div class="row"><span class="lbl">เลือดชีวิต (HP)</span><span id="sHpTxt">—</span></div>
       <div class="hpbar"><div id="sHpFill" class="hpfill"></div></div>
       <div class="row mt"><span class="lbl">AC</span><span id="sAc" class="big">—</span></div>
     </div>
-
     <div class="card">
       <div class="lbl">เงื่อนไข</div>
       <div id="sCond" class="chips"><span class="muted">ปกติ</span></div>
     </div>
-
     <div class="card">
       <div class="row"><span class="lbl">สถานที่</span><span id="sLoc" class="val">—</span></div>
       <div class="row"><span class="lbl">ทอง</span><span id="sGold" class="val">—</span></div>
       <div class="row"><span class="lbl">นาฬิกาพิธีลัทธิ</span><span id="sClock" class="val danger">0/6</span></div>
     </div>
-
     <div class="card note">
       <b>กฏเหล็ก:</b> เต๋าไม่โกหก · ไม่มีแต้มต่อ · ตายได้จริง · คุณเป็นแค่ตัวละครในโลก
     </div>
