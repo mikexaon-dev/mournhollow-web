@@ -16,12 +16,49 @@ app = Flask(__name__, static_folder="static", static_url_path="")
 
 API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
 
-CANDIDATE_MODELS = []
-for _m in [os.environ.get("GEMINI_MODEL", "").strip(),
-           "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]:
-    if _m and _m not in CANDIDATE_MODELS:
-        CANDIDATE_MODELS.append(_m)
+# ลำดับโมเดลที่อยากใช้ (คุณภาพดี -> เสถียร/ว่างสูง) ตัว lite ช่วยกัน error 503
+PREFERRED_MODELS = [
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-flash-latest",
+    "gemini-2.0-flash-lite",
+    "gemini-2.5-flash-lite",
+]
 
+
+def discover_models():
+    """ถามรายชื่อโมเดลที่คีย์นี้ใช้ได้จริง (รองรับ generateContent)"""
+    if not API_KEY:
+        return []
+    try:
+        r = requests.get(
+            "https://generativelanguage.googleapis.com/v1beta/models",
+            headers={"x-goog-api-key": API_KEY}, timeout=15,
+        )
+        if r.status_code == 200:
+            out = []
+            for m in r.json().get("models", []):
+                if "generateContent" in m.get("supportedGenerationMethods", []):
+                    name = m.get("name", "").replace("models/", "")
+                    if name:
+                        out.append(name)
+            return out
+    except Exception:
+        pass
+    return []
+
+
+def build_candidates():
+    available = set(discover_models())
+    env_m = os.environ.get("GEMINI_MODEL", "").strip()
+    wanted = []
+    for m in ([env_m] if env_m else []) + PREFERRED_MODELS:
+        if m and m not in wanted and (not available or m in available):
+            wanted.append(m)
+    return wanted or ["gemini-2.5-flash", "gemini-2.0-flash"]
+
+
+CANDIDATE_MODELS = build_candidates()
 _state = {"model": None}
 
 
