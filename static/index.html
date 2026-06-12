@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เงาเหนือมอร์นโฮลโลว์ — เล่นกับ AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== Setup overlay ===== -->
+<div id="setup" class="overlay">
+  <div class="setup-card">
+    <div class="ember"></div>
+    <h1>เงาเหนือมอร์นโฮลโลว์</h1>
+    <p class="tagline">โลกที่จดจำทุกการตัดสินใจ · เต๋าที่ไม่เคยโกหก · ความตายที่เกิดขึ้นได้จริง</p>
+
+    <h3>๑ · เลือกฮีโร่</h3>
+    <div class="heroes" id="heroPick">
+      <button class="hero" data-hero="เคย์น" data-klass="Fighter">
+        <span class="hn">เคย์น</span><span class="hk">Human Fighter</span>
+        <span class="hd">ทหารผ่านศึกหนีอดีต · อึด ถึก แนวหน้า</span>
+      </button>
+      <button class="hero" data-hero="เวสเปอร์" data-klass="Rogue">
+        <span class="hn">เวสเปอร์</span><span class="hk">Tiefling Rogue</span>
+        <span class="hd">นักลอบคมเขี้ยว · เปราะบางแต่อันตราย</span>
+      </button>
+      <button class="hero" data-hero="เอลส์เบธ" data-klass="Cleric">
+        <span class="hn">เอลส์เบธ</span><span class="hk">Human Cleric</span>
+        <span class="hd">นักบวชสายมืด · รักษา + อึด</span>
+      </button>
+    </div>
+
+    <h3>๒ · เลือกโหมด</h3>
+    <div class="modes" id="modePick">
+      <button class="mode sel" data-mode="A"><b>A — เล่นเอง</b><span>คุณคุมฮีโร่ AI เป็น GM</span></button>
+      <button class="mode" data-mode="C"><b>C — ดู AI เล่น</b><span>AI เล่นทั้ง GM และฮีโร่ คุณกำกับ</span></button>
+    </div>
+
+    <button id="startBtn" class="start" disabled>เลือกฮีโร่ก่อน…</button>
+    <p class="hint" id="setupHint"></p>
+  </div>
+</div>
+
+<!-- ===== Main ===== -->
+<header class="topbar">
+  <div class="brand">เงาเหนือมอร์นโฮลโลว์ <span class="ver">· เล่นกับ AI</span></div>
+  <div class="topright">
+    <span id="conn" class="conn">●</span>
+    <button id="resetBtn" class="ghost" title="เริ่มใหม่">↻ เริ่มใหม่</button>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="chatwrap">
+    <div id="chat" class="chat"></div>
+    <div id="typing" class="typing" hidden><span></span><span></span><span></span> GM กำลังคิด…</div>
+    <div class="inputbar">
+      <textarea id="input" rows="1" placeholder="พิมพ์สิ่งที่ตัวละครจะทำ… (Enter ส่ง · Shift+Enter ขึ้นบรรทัด)"></textarea>
+      <div class="btns">
+        <button id="contBtn" class="cont" title="ให้เรื่องเดินต่อ (สำหรับโหมด C)" hidden>▶ ต่อ</button>
+        <button id="sendBtn" class="send">ส่ง</button>
+      </div>
+    </div>
+  </section>
+
+  <aside class="status">
+    <div class="card hero-card">
+      <div class="hero-name" id="sName">—</div>
+      <div class="hero-sub"><span id="sKlass">—</span> · Lv <span id="sLevel">1</span> · <span class="mode-badge" id="sMode">A</span></div>
+    </div>
+
+    <div class="card">
+      <div class="row"><span class="lbl">เลือดชีวิต (HP)</span><span id="sHpTxt">—</span></div>
+      <div class="hpbar"><div id="sHpFill" class="hpfill"></div></div>
+      <div class="row mt"><span class="lbl">AC</span><span id="sAc" class="big">—</span></div>
+    </div>
+
+    <div class="card">
+      <div class="lbl">เงื่อนไข</div>
+      <div id="sCond" class="chips"><span class="muted">ปกติ</span></div>
+    </div>
+
+    <div class="card">
+      <div class="row"><span class="lbl">สถานที่</span><span id="sLoc" class="val">—</span></div>
+      <div class="row"><span class="lbl">ทอง</span><span id="sGold" class="val">—</span></div>
+      <div class="row"><span class="lbl">นาฬิกาพิธีลัทธิ</span><span id="sClock" class="val danger">0/6</span></div>
+    </div>
+
+    <div class="card note">
+      <b>กฏเหล็ก:</b> เต๋าไม่โกหก · ไม่มีแต้มต่อ · ตายได้จริง · คุณเป็นแค่ตัวละครในโลก
+    </div>
+  </aside>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
