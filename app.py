@@ -7,6 +7,7 @@ import os
 import re
 import html
 import json
+import time
 import requests
 from flask import Flask, request, jsonify, send_from_directory
 
@@ -104,43 +105,56 @@ def build_payload(contents):
     }
 
 
+TRANSIENT = (429, 500, 502, 503, 504)
+
+
 def call_gemini(contents):
     models = list(CANDIDATE_MODELS)
     if _state["model"] and _state["model"] in models:
         models.remove(_state["model"])
         models.insert(0, _state["model"])
     last_err = "ไม่มีโมเดลให้ลอง"
-    for model in models:
-        url = "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent" % model
-        try:
-            r = requests.post(
-                url,
-                headers={"x-goog-api-key": API_KEY, "Content-Type": "application/json"},
-                json=build_payload(contents),
-                timeout=120,
-            )
-        except requests.Timeout:
-            return None, model, "หมดเวลาเชื่อมต่อ Gemini (timeout)"
-        except Exception as e:  # noqa
-            last_err = "เชื่อมต่อไม่ได้: %s" % e
-            continue
-        if r.status_code == 200:
-            data = r.json()
-            cands = data.get("candidates", [])
-            if cands:
-                parts = cands[0].get("content", {}).get("parts", [])
-                text = "".join(p.get("text", "") for p in parts).strip()
-                if text:
-                    _state["model"] = model
-                    return text, model, None
-                reason = cands[0].get("finishReason", "")
-                return None, model, "โมเดลไม่ส่งข้อความ (finishReason=%s) อาจถูกตัวกรองบล็อก" % reason
-            pf = data.get("promptFeedback", {})
-            return None, model, "ถูกบล็อก: %s" % json.dumps(pf, ensure_ascii=False)[:300]
-        last_err = "HTTP %s จากโมเดล %s: %s" % (r.status_code, model, r.text[:200])
-        if r.status_code in (400, 404):
-            continue
-        break
+    for attempt in range(2):  # ลองซ้ำ 1 รอบถ้าทุกโมเดลโหลดสูงชั่วคราว
+        saw_transient = False
+        for model in models:
+            url = "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent" % model
+            try:
+                r = requests.post(
+                    url,
+                    headers={"x-goog-api-key": API_KEY, "Content-Type": "application/json"},
+                    json=build_payload(contents),
+                    timeout=120,
+                )
+            except requests.Timeout:
+                last_err = "หมดเวลาเชื่อมต่อ Gemini (timeout)"
+                saw_transient = True
+                continue
+            except Exception as e:  # noqa
+                last_err = "เชื่อมต่อไม่ได้: %s" % e
+                continue
+            if r.status_code == 200:
+                data = r.json()
+                cands = data.get("candidates", [])
+                if cands:
+                    parts = cands[0].get("content", {}).get("parts", [])
+                    text = "".join(p.get("text", "") for p in parts).strip()
+                    if text:
+                        _state["model"] = model
+                        return text, model, None
+                    reason = cands[0].get("finishReason", "")
+                    return None, model, "โมเดลไม่ส่งข้อความ (finishReason=%s) อาจถูกตัวกรองบล็อก ลองพิมพ์ใหม่" % reason
+                pf = data.get("promptFeedback", {})
+                return None, model, "ถูกบล็อก: %s" % json.dumps(pf, ensure_ascii=False)[:300]
+            last_err = "HTTP %s (%s): %s" % (r.status_code, model, r.text[:160])
+            if r.status_code in TRANSIENT:
+                saw_transient = True
+                continue  # โมเดลโหลดสูง/ชั่วคราว → ลองโมเดลถัดไปทันที
+            if r.status_code in (400, 404):
+                continue  # โมเดลใช้ไม่ได้ → ลองโมเดลถัดไป
+            return None, model, last_err  # เช่น 401/403 คีย์ผิด → หยุด
+        if not saw_transient:
+            break
+        time.sleep(1.5)  # ทุกโมเดลโหลดสูง รอแล้วลองทั้งชุดอีกครั้ง
     return None, None, last_err
 
 

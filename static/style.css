@@ -164,4 +164,6 @@ button{ font-family:inherit; cursor:pointer; }
 .msg.gm .dtxt{ color:#efe3cb; }
 .msg.gm .say{ color:#f1ddae; font-style:italic; }
 .msg.gm b{ color:#f5ead0; }
+.retry{ background:#2a1d18; color:var(--ember); border:1px solid #5a3f2a; border-radius:8px; padding:6px 14px; font-weight:600; cursor:pointer; }
+.retry:hover{ background:#34241c; }
 

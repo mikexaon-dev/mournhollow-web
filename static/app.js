@@ -120,6 +120,13 @@ function updatePanel(s) {
 }
 
 /* ===================== เรียก GM ===================== */
+function addRetry() {
+  const d = document.createElement("div");
+  d.className = "msg sys";
+  d.innerHTML = '<button class="retry">🔄 ลองอีกครั้ง</button>';
+  d.querySelector(".retry").onclick = () => { d.remove(); callGM(); };
+  chat.appendChild(d); chat.scrollTop = chat.scrollHeight;
+}
 async function callGM() {
   if (busy) return;
   busy = true; $("sendBtn").disabled = true; $("typing").hidden = false;
@@ -132,6 +139,7 @@ async function callGM() {
     const data = await res.json();
     if (!res.ok || data.error) {
       bubble("sys", "⚠️ " + (data.error || ("HTTP " + res.status)));
+      addRetry();
     } else {
       history.push({ role: "model", text: data.text });
       const { clean, state } = parseState(data.text);
@@ -141,6 +149,7 @@ async function callGM() {
     }
   } catch (e) {
     bubble("sys", "⚠️ เชื่อมต่อเซิร์ฟเวอร์ไม่ได้: " + e.message);
+    addRetry();
   } finally {
     busy = false; $("sendBtn").disabled = false; $("typing").hidden = true;
     chat.scrollTop = chat.scrollHeight;
@@ -177,6 +186,8 @@ function restore() {
     else { bubble("you", m.text); }
   });
   if (lastState) updatePanel(lastState);
+  // ถ้าตาสุดท้ายเป็นของผู้เล่นแต่ GM ยังไม่ตอบ (เช่นเจอ error แล้วรีเฟรช) ให้เดินเรื่องต่อเอง
+  if (history.length && history[history.length - 1].role === "user") callGM();
 }
 
 /* ===================== ทอยเต๋า (crypto จริง) ===================== */
