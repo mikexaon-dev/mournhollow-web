@@ -117,6 +117,41 @@ function updatePanel(s) {
     ? s.conditions.map((c) => `<span class="chip">${escapeHtml(c)}</span>`).join("")
     : `<span class="muted">ปกติ</span>`;
   if (s.alive === false) $("sName").innerHTML = escapeHtml(s.name || "") + " ☠";
+  renderHotbar(s);
+}
+
+let HOTCODES = {};
+function renderHotbar(s) {
+  const hb = document.getElementById("hotbar");
+  HOTCODES = {};
+  const skills = Array.isArray(s.skills) ? s.skills : [];
+  const items = Array.isArray(s.items) ? s.items : [];
+  if (!skills.length && !items.length) { hb.hidden = true; hb.innerHTML = ""; return; }
+  let html = "";
+  if (skills.length) {
+    html += '<div class="hb-group"><span class="hb-head">⚔️ สกิล</span>';
+    skills.forEach((sk, i) => {
+      const code = "S" + (i + 1);
+      const name = sk && sk.n ? sk.n : String(sk);
+      HOTCODES[code.toLowerCase()] = name;
+      const d = sk && sk.d ? ` <span class="hb-d">${escapeHtml(sk.d)}</span>` : "";
+      html += `<button class="hb-chip" data-name="${escapeHtml(name)}"><span class="hb-code">${code}</span> ${escapeHtml(name)}${d}</button>`;
+    });
+    html += "</div>";
+  }
+  if (items.length) {
+    html += '<div class="hb-group"><span class="hb-head">🎒 ไอเท็ม</span>';
+    items.forEach((it, i) => {
+      const code = "I" + (i + 1);
+      const name = it && it.n ? it.n : String(it);
+      HOTCODES[code.toLowerCase()] = name;
+      const q = it && it.q ? ` ×${it.q}` : "";
+      html += `<button class="hb-chip item" data-name="${escapeHtml(name)}"><span class="hb-code">${code}</span> ${escapeHtml(name)}${q}</button>`;
+    });
+    html += "</div>";
+  }
+  hb.innerHTML = html;
+  hb.hidden = false;
 }
 
 /* ===================== เรียก GM ===================== */
@@ -274,9 +309,18 @@ $("setup").addEventListener("click", (e) => {
 });
 
 $("sendBtn").addEventListener("click", () => {
-  const t = $("input").value; $("input").value = ""; autosize(); sendUser(t);
+  let t = $("input").value;
+  const code = t.trim().toLowerCase();
+  if (HOTCODES[code]) t = "ใช้ " + HOTCODES[code];   // พิมพ์รหัสย่อ เช่น s1 / i2
+  $("input").value = ""; autosize(); sendUser(t);
 });
 $("contBtn").addEventListener("click", () => sendUser("(เดินเรื่องต่อ)", "sys"));
+document.getElementById("hotbar").addEventListener("click", (e) => {
+  const b = e.target.closest(".hb-chip"); if (!b) return;
+  const inp = $("input");
+  inp.value = "ใช้ " + b.dataset.name + " ";
+  inp.focus(); autosize();
+});
 $("input").addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("sendBtn").click(); }
 });
