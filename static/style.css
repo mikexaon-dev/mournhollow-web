@@ -154,3 +154,14 @@ button{ font-family:inherit; cursor:pointer; }
 .start.small{ padding:10px; font-size:14px; }
 .empty{ color:var(--muted); font-size:13px; text-align:center; padding:16px; }
 
+/* ===== การแสดงผล GM แบบหนังสือ ===== */
+.msg.gm{ line-height:1.72; }
+.msg.gm .narr{ margin:0 0 .5em; }
+.msg.gm .narr:last-child{ margin-bottom:0; }
+.msg.gm .pgap{ height:.35em; }
+.msg.gm .dlg{ margin:.28em 0; padding:.12em 0 .12em .65em; border-left:2px solid #6e4a30; }
+.msg.gm .spk{ color:var(--ember); font-weight:700; }
+.msg.gm .dtxt{ color:#efe3cb; }
+.msg.gm .say{ color:#f1ddae; font-style:italic; }
+.msg.gm b{ color:#f5ead0; }
+

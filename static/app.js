@@ -59,12 +59,35 @@ function deleteGame(id) {
 function escapeHtml(s) {
   return String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
 }
+function fmtInline(s) {
+  s = s.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+  s = s.replace(/("[^"]*"|“[^”]*”|「[^」]*」|«[^»]*»)/g, '<span class="say">$1</span>');
+  s = s.replace(/\((?:d20|d\d+|ทอย|เต๋า)[^)]*\)/g, (m) => `<span class="roll">${m}</span>`);
+  return s;
+}
+function formatGM(raw) {
+  const lines = escapeHtml(raw).split("\n");
+  let html = "";
+  for (const ln of lines) {
+    const t = ln.trim();
+    if (!t) { html += '<div class="pgap"></div>'; continue; }
+    const m = t.match(/^([^:：<][^:：]{0,24})[:：]\s*(["“「«].*)$/);
+    if (m) {
+      html += `<div class="dlg"><span class="spk">${m[1]}</span><span class="dtxt">: ${fmtInline(m[2])}</span></div>`;
+    } else {
+      html += `<div class="narr">${fmtInline(t)}</div>`;
+    }
+  }
+  return html;
+}
 function bubble(kind, text) {
   const div = document.createElement("div");
   div.className = "msg " + kind;
   const who = kind === "gm" ? "GM" : kind === "you" ? "คุณ" : "";
   let html = who ? `<div class="who">${who}</div>` : "";
-  html += escapeHtml(text).replace(/\((?:d20|d\d+|ทอย|เต๋า)[^)]*\)/g, (m) => `<span class="roll">${m}</span>`);
+  html += kind === "gm"
+    ? formatGM(text)
+    : escapeHtml(text).replace(/\((?:d20|d\d+|ทอย|เต๋า)[^)]*\)/g, (m) => `<span class="roll">${m}</span>`);
   div.innerHTML = html;
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
