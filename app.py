@@ -85,7 +85,7 @@ def build_payload(contents):
         "generationConfig": {
             "temperature": 0.95,
             "topP": 0.95,
-            "maxOutputTokens": 2048,
+            "maxOutputTokens": 4096,
         },
         # โทน grimdark มีความรุนแรงแฟนตาซี ลดการบล็อกเกินจำเป็น
         "safetySettings": [
