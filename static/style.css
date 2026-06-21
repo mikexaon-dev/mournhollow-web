@@ -179,3 +179,28 @@ button{ font-family:inherit; cursor:pointer; }
 .hb-chip.item .hb-code{ background:#3a5a40; }
 .hb-d{ color:var(--muted); font-size:11px; }
 
+/* ===== ระบบใหม่: XP / คอมแบต / แผนที่ / ปาร์ตี้ ===== */
+.hidden{ display:none !important; }
+.xpwrap{ margin-top:9px; }
+.xpbar{ height:7px; background:#241a14; border:1px solid #4a3a24; border-radius:6px; overflow:hidden; }
+.xpfill{ height:100%; width:0%; background:linear-gradient(90deg,#6a5a2a,var(--gold)); transition:width .4s; }
+.xptxt{ font-size:10.5px; color:var(--muted); margin-top:3px; text-align:right; }
+.combat{ border-top:3px solid var(--red); }
+.enemies{ display:flex; flex-direction:column; gap:8px; margin-top:8px; }
+.enemy{ font-size:12px; }
+.enemy .en-top{ display:flex; justify-content:space-between; align-items:center; }
+.enemy .en-name{ color:#f0c89a; } .enemy .en-name.turn{ color:#7ee07e; font-weight:700; }
+.enemy .en-hp{ color:var(--muted); font-size:11px; }
+.enemy .ehpbar{ height:7px; background:#2a1411; border:1px solid #4a201a; border-radius:5px; overflow:hidden; margin-top:3px; }
+.enemy .ehpfill{ height:100%; background:linear-gradient(90deg,#7c1512,#cf3b2a); transition:width .4s; }
+.enemy .en-cond{ font-size:10.5px; color:var(--ember); margin-top:2px; }
+.map{ display:flex; flex-wrap:wrap; gap:5px; margin-top:6px; }
+.room{ font-size:11.5px; padding:4px 9px; border-radius:7px; cursor:pointer; background:#241a14; border:1px solid #4a3a24; color:#cbb892; }
+.room:hover{ border-color:var(--gold); color:#f1e3c8; }
+.room.here{ background:#2a1714; border-color:var(--red); color:#f0c89a; cursor:default; box-shadow:0 0 0 1px var(--red) inset; }
+.ally{ margin-top:8px; font-size:12px; }
+.ally .al-top{ display:flex; justify-content:space-between; align-items:center; }
+.ally .al-name{ color:#9fe0a8; font-weight:600; } .ally .al-note{ color:var(--muted); font-size:11px; }
+.ally .ahpbar{ height:6px; background:#13251a; border:1px solid #2a4a30; border-radius:5px; overflow:hidden; margin-top:3px; }
+.ally .ahpfill{ height:100%; background:linear-gradient(90deg,#2f7d4a,#5fbf6a); transition:width .4s; }
+

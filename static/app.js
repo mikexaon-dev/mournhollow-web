@@ -3,7 +3,7 @@ const SAVES_KEY = "mournhollow_saves_v1";
 const $ = (id) => document.getElementById(id);
 const chat = $("chat");
 
-let pick = { hero: null, klass: null, mode: "A" };
+let pick = { hero: null, klass: null, mode: "A", campaign: "เงาเหนือมอร์นโฮลโลว์" };
 let history = [];          // [{role:'user'|'model', text}] -> ส่งให้ API
 let lastState = null;
 let gameId = null;
@@ -118,6 +118,7 @@ function updatePanel(s) {
     : `<span class="muted">ปกติ</span>`;
   if (s.alive === false) $("sName").innerHTML = escapeHtml(s.name || "") + " ☠";
   renderHotbar(s);
+  renderXp(s); renderCombat(s.combat); renderMap(s.map, s.location); renderParty(s.party);
 }
 
 let HOTCODES = {};
@@ -152,6 +153,43 @@ function renderHotbar(s) {
   }
   hb.innerHTML = html;
   hb.hidden = false;
+}
+
+function renderXp(s) {
+  if (s.xp !== undefined && s.xp_next) {
+    $("sXpFill").style.width = Math.max(0, Math.min(100, (s.xp / s.xp_next) * 100)) + "%";
+    $("sXpTxt").textContent = `XP ${s.xp} / ${s.xp_next}`;
+  } else { $("sXpFill").style.width = "0%"; $("sXpTxt").textContent = ""; }
+}
+function renderCombat(cb) {
+  const card = $("combatCard");
+  if (!cb || !cb.active || !Array.isArray(cb.enemies) || !cb.enemies.length) { card.classList.add("hidden"); return; }
+  card.classList.remove("hidden");
+  $("cbRound").textContent = "รอบ " + (cb.round || 1) + (cb.turn ? " · ตา: " + cb.turn : "");
+  $("cbEnemies").innerHTML = cb.enemies.map((e) => {
+    const mx = e.max_hp || e.hp || 1;
+    const pct = Math.max(0, Math.min(100, (e.hp != null ? e.hp / mx : 1) * 100));
+    const turn = (cb.turn && e.n === cb.turn) ? " turn" : "";
+    const cond = e.cond ? `<div class="en-cond">${escapeHtml(e.cond)}</div>` : "";
+    return `<div class="enemy"><div class="en-top"><span class="en-name${turn}">${escapeHtml(e.n || "ศัตรู")}</span><span class="en-hp">${e.hp != null ? e.hp : "?"}/${mx}</span></div><div class="ehpbar"><div class="ehpfill" style="width:${pct}%"></div></div>${cond}</div>`;
+  }).join("");
+}
+function renderMap(map, here) {
+  here = here || "";
+  $("sMap").innerHTML = (Array.isArray(map) && map.length)
+    ? map.map((r) => `<span class="room${r === here ? " here" : ""}" data-go="${escapeHtml(r)}">${r === here ? "📍 " : ""}${escapeHtml(r)}</span>`).join("")
+    : `<span class="muted">—</span>`;
+}
+function renderParty(party) {
+  const card = $("partyCard");
+  if (!Array.isArray(party) || !party.length) { card.classList.add("hidden"); return; }
+  card.classList.remove("hidden");
+  $("sParty").innerHTML = party.map((a) => {
+    const mx = a.max_hp || a.hp || 1;
+    const pct = Math.max(0, Math.min(100, (a.hp != null ? a.hp / mx : 1) * 100));
+    const note = a.note ? `<span class="al-note">${escapeHtml(a.note)}</span>` : "";
+    return `<div class="ally"><div class="al-top"><span class="al-name">${escapeHtml(a.n || "เพื่อน")}</span>${note}</div><div class="ahpbar"><div class="ahpfill" style="width:${pct}%"></div></div><div class="al-note" style="text-align:right">HP ${a.hp != null ? a.hp : "?"}/${mx}</div></div>`;
+  }).join("");
 }
 
 /* ===================== เรียก GM ===================== */
@@ -199,24 +237,24 @@ function sendUser(text, displayKind = "you") {
 
 /* ===================== เริ่มเกม ===================== */
 function kickoff() {
-  const { hero, klass, mode } = pick;
+  const { hero, klass, mode, campaign } = pick;
   let msg;
   if (mode === "C") {
-    msg = `เริ่มเกมโหมด C ใช้ฮีโร่ "${hero}" (${klass}) โดยคุณ(AI)สวมบทฮีโร่และคิดเองด้วย เล่นทั้ง [GM] และ [ฮีโร่] ` +
-      `จัดชีตระดับ 1 ตามหมวด ๓ แล้วเปิดฉาก "ถนนเถ้า" เดินเรื่อง 1 จังหวะแล้วหยุดให้ฉันกำกับ ` +
+    msg = `เริ่มเกมโหมด C เล่นแคมเปญ "${campaign}" ใช้ฮีโร่ "${hero}" (${klass}) โดยคุณ(AI)สวมบทฮีโร่และคิดเองด้วย เล่นทั้ง [GM] และ [ฮีโร่] ` +
+      `จัดชีตระดับ 1 แล้วเปิด "ฉากเปิด" ของแคมเปญนี้ เดินเรื่อง 1 จังหวะแล้วหยุดให้ฉันกำกับ ` +
       `ฮีโร่ต้องไม่รู้ความจริงเบื้องหลังหรือค่าพลังศัตรู และอย่าลืมแนบบล็อก [[STATE]] ท้ายคำตอบ`;
   } else {
-    msg = `เริ่มเกมโหมด A ฉันขอเล่นเป็นฮีโร่ "${hero}" (${klass}) ด้วยตัวเอง ` +
-      `จัดชีตระดับ 1 ตามหมวด ๓ แล้วเปิดฉาก "ถนนเถ้า" จบด้วยการถามว่าฉันจะทำอะไร และอย่าลืมแนบบล็อก [[STATE]] ท้ายคำตอบ`;
+    msg = `เริ่มเกมโหมด A เล่นแคมเปญ "${campaign}" ฉันขอเล่นเป็นฮีโร่ "${hero}" (${klass}) ด้วยตัวเอง ` +
+      `จัดชีตระดับ 1 แล้วเปิด "ฉากเปิด" ของแคมเปญนี้ จบด้วยการถามว่าฉันจะทำอะไร และอย่าลืมแนบบล็อก [[STATE]] ท้ายคำตอบ`;
   }
-  bubble("sys", `⚔️ เริ่มเกม · ฮีโร่ ${hero} (${klass}) · โหมด ${mode}`);
+  bubble("sys", `⚔️ เริ่มเกม · ${campaign} · ฮีโร่ ${hero} (${klass}) · โหมด ${mode}`);
   history.push({ role: "user", text: msg });
   saveCurrent(); callGM();
 }
 function restore() {
   history.forEach((m, i) => {
     if (m.role === "model") { bubble("gm", parseState(m.text).clean); }
-    else if (i === 0 && /เริ่มเกมโหมด/.test(m.text)) { bubble("sys", `⚔️ เริ่มเกม · ฮีโร่ ${pick.hero} (${pick.klass}) · โหมด ${pick.mode}`); }
+    else if (i === 0 && /เริ่มเกมโหมด/.test(m.text)) { bubble("sys", `⚔️ เริ่มเกม · ${pick.campaign || ""} · ฮีโร่ ${pick.hero} (${pick.klass}) · โหมด ${pick.mode}`); }
     else if (m.text === "(เดินเรื่องต่อ)") { bubble("sys", "▶ เดินเรื่องต่อ"); }
     else { bubble("you", m.text); }
   });
@@ -288,9 +326,14 @@ $("heroPick").addEventListener("click", (e) => {
   $("startBtn").disabled = false;
   $("startBtn").textContent = `เริ่มเกมกับ ${pick.hero} ▶`;
 });
+$("campPick").addEventListener("click", (e) => {
+  const b = e.target.closest(".mode"); if (!b) return;
+  document.querySelectorAll("#campPick .mode").forEach((x) => x.classList.remove("sel"));
+  b.classList.add("sel"); pick.campaign = b.dataset.camp;
+});
 $("modePick").addEventListener("click", (e) => {
   const b = e.target.closest(".mode"); if (!b) return;
-  document.querySelectorAll(".mode").forEach((x) => x.classList.remove("sel"));
+  document.querySelectorAll("#modePick .mode").forEach((x) => x.classList.remove("sel"));
   b.classList.add("sel"); pick.mode = b.dataset.mode;
   $("setupHint").textContent = pick.mode === "C"
     ? "โหมด C: นั่งดู AI เล่นเอง กดปุ่ม ‘▶ ต่อ’ เพื่อเดินเรื่อง หรือพิมพ์กำกับได้"
@@ -320,6 +363,10 @@ document.getElementById("hotbar").addEventListener("click", (e) => {
   const inp = $("input");
   inp.value = "ใช้ " + b.dataset.name + " ";
   inp.focus(); autosize();
+});
+$("sMap").addEventListener("click", (e) => {
+  const r = e.target.closest(".room"); if (!r || r.classList.contains("here")) return;
+  sendUser("เดินทางไป " + r.dataset.go);
 });
 $("input").addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("sendBtn").click(); }

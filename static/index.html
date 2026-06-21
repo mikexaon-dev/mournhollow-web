@@ -18,7 +18,13 @@
     <h1>เงาเหนือมอร์นโฮลโลว์</h1>
     <p class="tagline">โลกที่จดจำทุกการตัดสินใจ · เต๋าที่ไม่เคยโกหก · ความตายที่เกิดขึ้นได้จริง</p>
 
-    <h3>๑ · เลือกฮีโร่</h3>
+    <h3>๑ · เลือกแคมเปญ</h3>
+    <div class="modes" id="campPick">
+      <button class="mode sel" data-camp="เงาเหนือมอร์นโฮลโลว์"><b>🕯️ เงาเหนือมอร์นโฮลโลว์</b><span>โทนมืด/สยอง · เมืองต้องคำสาปเปลวร่วง</span></button>
+      <button class="mode" data-camp="ทะเลคำสาปเกลือดำ"><b>🏴‍☠️ ทะเลคำสาปเกลือดำ</b><span>ผจญภัยทะเล/โจรสลัด · เกาะต้องสาป กองเรือผี</span></button>
+    </div>
+
+    <h3>๒ · เลือกฮีโร่</h3>
     <div class="heroes" id="heroPick">
       <button class="hero" data-hero="เคย์น" data-klass="Fighter">
         <span class="hn">เคย์น</span><span class="hk">Human Fighter</span>
@@ -42,7 +48,7 @@
       </button>
     </div>
 
-    <h3>๒ · เลือกโหมด</h3>
+    <h3>๓ · เลือกโหมด</h3>
     <div class="modes" id="modePick">
       <button class="mode sel" data-mode="A"><b>A — เล่นเอง</b><span>คุณคุมฮีโร่ AI เป็น GM</span></button>
       <button class="mode" data-mode="C"><b>C — ดู AI เล่น</b><span>AI เล่นทั้ง GM และฮีโร่ คุณกำกับ</span></button>
@@ -117,11 +123,16 @@
     <div class="card hero-card">
       <div class="hero-name" id="sName">—</div>
       <div class="hero-sub"><span id="sKlass">—</span> · Lv <span id="sLevel">1</span> · <span class="mode-badge" id="sMode">A</span></div>
+      <div class="xpwrap"><div class="xpbar"><div id="sXpFill" class="xpfill"></div></div><div class="xptxt" id="sXpTxt">XP —</div></div>
     </div>
     <div class="card">
       <div class="row"><span class="lbl">เลือดชีวิต (HP)</span><span id="sHpTxt">—</span></div>
       <div class="hpbar"><div id="sHpFill" class="hpfill"></div></div>
       <div class="row mt"><span class="lbl">AC</span><span id="sAc" class="big">—</span></div>
+    </div>
+    <div class="card combat hidden" id="combatCard">
+      <div class="row"><span class="lbl">⚔️ การต่อสู้</span><span id="cbRound" class="val danger">—</span></div>
+      <div id="cbEnemies" class="enemies"></div>
     </div>
     <div class="card">
       <div class="lbl">เงื่อนไข</div>
@@ -130,7 +141,15 @@
     <div class="card">
       <div class="row"><span class="lbl">สถานที่</span><span id="sLoc" class="val">—</span></div>
       <div class="row"><span class="lbl">ทอง</span><span id="sGold" class="val">—</span></div>
-      <div class="row"><span class="lbl">นาฬิกาพิธีลัทธิ</span><span id="sClock" class="val danger">0/6</span></div>
+      <div class="row"><span class="lbl">นาฬิกาภัย</span><span id="sClock" class="val danger">0/6</span></div>
+    </div>
+    <div class="card">
+      <div class="lbl">🗺️ แผนที่ · คลิกเพื่อเดินทาง</div>
+      <div id="sMap" class="map"><span class="muted">—</span></div>
+    </div>
+    <div class="card party hidden" id="partyCard">
+      <div class="lbl">🛡️ เพื่อนร่วมทาง</div>
+      <div id="sParty"></div>
     </div>
     <div class="card note">
       <b>กฏเหล็ก:</b> เต๋าไม่โกหก · ไม่มีแต้มต่อ · ตายได้จริง · คุณเป็นแค่ตัวละครในโลก
